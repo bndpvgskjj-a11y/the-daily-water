@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/news.js": {
+    "api/*.js": {
       "maxDuration": 60
     }
   }

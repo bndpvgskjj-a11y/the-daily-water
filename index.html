@@ -27,13 +27,10 @@ main{padding:16px 12px max(60px,calc(60px + env(safe-area-inset-bottom)));max-wi
 #empty .emo{font-size:50px;margin-bottom:16px}
 #empty h2{font-family:'Playfair Display',serif;font-size:19px;color:#0e1e2e;margin-bottom:8px}
 #empty p{font-family:'Space Mono',monospace;font-size:10px;color:#091420;line-height:1.9}
-
-/* progress bar */
 #progressWrap{display:none;padding:10px 0 4px}
 #progressBar{height:2px;background:#1a2a3a;border-radius:2px;overflow:hidden;margin-bottom:6px}
 #progressFill{height:100%;width:0%;background:linear-gradient(90deg,#1a4a8a,#3b9eff);border-radius:2px;transition:width .4s ease}
 #progressLabel{font-family:'Space Mono',monospace;font-size:10px;color:#2a4a6a;text-align:center}
-
 .grid-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
 .col{flex:1 1 280px;min-width:260px;border-radius:14px;padding:16px;box-shadow:0 4px 24px rgba(0,0,0,.5)}
 @media(max-width:580px){.col{min-width:100%}}
@@ -44,11 +41,17 @@ main{padding:16px 12px max(60px,calc(60px + env(safe-area-inset-bottom)));max-wi
 .col-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#1a2a3a}
 .col-dot.loading{background:#ffd166;box-shadow:0 0 7px #ffd166aa;animation:pulse 1s ease infinite}
 .col-dot.done{background:#2dc653;box-shadow:0 0 6px #2dc653aa}
-.col-dot.waiting{background:#1a3a5a}
-.card{background:rgba(255,255,255,.027);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:13px 14px;margin-bottom:8px;cursor:pointer;transition:background .12s;touch-action:manipulation;min-height:44px}
+/* CARD */
+.card{background:rgba(255,255,255,.027);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background .12s;touch-action:manipulation;overflow:hidden}
 .card:active{background:rgba(255,255,255,.07)}
-.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.card-img-wrap{width:100%;height:130px;overflow:hidden;background:#0a1525;position:relative}
+.card-img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s;opacity:0}
+.card-img.loaded{opacity:1}
+.card-img-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.25}
+.card-body{padding:11px 13px}
+.card-meta{display:flex;align-items:center;gap:5px;margin-bottom:5px;flex-wrap:wrap}
 .card-cat{font-size:9px;font-family:'Space Mono',monospace;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.07em}
+.card-source{font-size:9px;font-family:'Space Mono',monospace;color:#2a4060;opacity:.8}
 .card-star{font-size:9px;color:#ffd166}
 .card-arr{margin-left:auto;opacity:.3;font-size:13px}
 .card-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#ccddf0;margin:0 0 5px;line-height:1.35}
@@ -60,24 +63,31 @@ main{padding:16px 12px max(60px,calc(60px + env(safe-area-inset-bottom)));max-wi
 .spin{display:inline-block;width:26px;height:26px;border-radius:50%;animation:spin .8s linear infinite}
 .spin-lbl{font-size:10px;font-family:'Space Mono',monospace;color:#243448;margin-top:10px}
 .wait-wrap{text-align:center;padding:30px 0;color:#1a3a5a;font-family:'Space Mono',monospace;font-size:10px}
-
-#modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #modal.open{display:flex;align-items:flex-end;justify-content:center}
 @media(min-width:601px){#modal.open{align-items:center;padding:20px}}
-.modal-sheet{background:#0b1220;border-radius:22px 22px 0 0;width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;padding:0 22px max(32px,env(safe-area-inset-bottom));box-shadow:0 -20px 60px rgba(0,0,0,.8);animation:slideUp .28s cubic-bezier(.32,1,.36,1)}
-@media(min-width:601px){.modal-sheet{border-radius:18px;max-width:720px;padding:32px 36px;animation:fadeUp .2s ease}}
-.drag-handle{width:36px;height:4px;background:#1e2e3e;border-radius:2px;margin:14px auto 18px}
+.modal-sheet{background:#0b1220;border-radius:22px 22px 0 0;width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;padding:0 0 max(32px,env(safe-area-inset-bottom));box-shadow:0 -20px 60px rgba(0,0,0,.8);animation:slideUp .28s cubic-bezier(.32,1,.36,1)}
+@media(min-width:601px){.modal-sheet{border-radius:18px;max-width:740px;padding:0 0 32px;animation:fadeUp .2s ease}}
+.drag-handle{width:36px;height:4px;background:#1e2e3e;border-radius:2px;margin:14px auto 0;display:block}
 @media(min-width:601px){.drag-handle{display:none}}
-.modal-hdr{display:flex;justify-content:space-between;gap:14px;margin-bottom:16px;align-items:flex-start}
-.modal-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.modal-hero-wrap{width:100%;height:200px;overflow:hidden;background:#0a1525;position:relative}
+@media(min-width:601px){.modal-hero-wrap{height:280px;border-radius:18px 18px 0 0}}
+.modal-hero{width:100%;height:100%;object-fit:cover;display:block}
+.modal-hero-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px;opacity:.2}
+.modal-content{padding:18px 20px}
+@media(min-width:601px){.modal-content{padding:24px 32px 8px}}
+.modal-hdr{display:flex;justify-content:space-between;gap:14px;margin-bottom:14px;align-items:flex-start}
+.modal-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .modal-tag{font-size:10px;font-family:'Space Mono',monospace;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.1em}
-.modal-src{font-size:10px;color:#2a4060;font-family:'Space Mono',monospace;padding:3px 5px}
-.modal-title{font-family:'Playfair Display',serif;font-size:clamp(16px,3vw,22px);font-weight:800;color:#f0f6ff;line-height:1.3}
+.modal-src-date{font-size:10px;color:#2a4060;font-family:'Space Mono',monospace;padding:3px 5px}
+.modal-title{font-family:'Playfair Display',serif;font-size:clamp(17px,3vw,24px);font-weight:800;color:#f0f6ff;line-height:1.3}
 .modal-close{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#6a8aaa;min-width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;flex-shrink:0}
-.modal-div{height:1px;margin-bottom:18px}
-.modal-sum{font-size:15px;color:#b8ccdf;line-height:1.8;border-left:3px solid transparent;padding-left:16px;margin-bottom:18px;font-style:italic}
-.modal-full{font-size:14px;color:#7a90a8;line-height:1.9}
-.modal-foot{margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);font-family:'Space Mono',monospace;font-size:10px;color:#1a2a3a;display:flex;justify-content:space-between}
+.modal-div{height:1px;margin:14px 0 16px}
+.modal-sum{font-size:15px;color:#b8ccdf;line-height:1.8;border-left:3px solid transparent;padding-left:16px;margin-bottom:16px;font-style:italic}
+.modal-full{font-size:14px;color:#7a90a8;line-height:1.95}
+.modal-link{display:inline-block;margin-top:16px;padding:10px 18px;border-radius:8px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;text-decoration:none;background:rgba(59,158,255,.1);color:#3b9eff;border:1px solid rgba(59,158,255,.25);touch-action:manipulation}
+.modal-foot{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);font-family:'Space Mono',monospace;font-size:9px;color:#1a2a3a;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
 footer{border-top:1px solid #060e18;padding:12px 18px max(12px,env(safe-area-inset-bottom));text-align:center;font-family:'Space Mono',monospace;font-size:8px;color:#060e18;letter-spacing:.18em}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -89,7 +99,7 @@ footer{border-top:1px solid #060e18;padding:12px 18px max(12px,env(safe-area-ins
 <header>
   <div class="hdr">
     <div>
-      <div class="masthead-label">Daily Intelligence · Water 4 You GmbH</div>
+      <div class="masthead-label">Daily Intelligence · Water 4 You GmbH · Echte Nachrichten</div>
       <h1 class="masthead">The Daily Water</h1>
       <div class="masthead-date" id="dateDisp"></div>
     </div>
@@ -97,223 +107,251 @@ footer{border-top:1px solid #060e18;padding:12px 18px max(12px,env(safe-area-ins
   </div>
 </header>
 <main>
-  <div id="empty"><div class="emo">📰</div><h2>Bereit für die heutige Ausgabe</h2><p>9 Kategorien · je 5 Artikel<br>Artikel antippen für Volltext</p></div>
-  <div id="progressWrap"><div id="progressBar"><div id="progressFill"></div></div><div id="progressLabel"></div></div>
+  <div id="empty">
+    <div class="emo">📰</div>
+    <h2>Bereit für die heutige Ausgabe</h2>
+    <p>9 Kategorien · Echte Nachrichten von NewsAPI<br>KI-aufbereitet auf Deutsch · Artikel antippen für Volltext</p>
+  </div>
+  <div id="progressWrap">
+    <div id="progressBar"><div id="progressFill"></div></div>
+    <div id="progressLabel"></div>
+  </div>
   <div id="grid" style="display:none"></div>
 </main>
-<footer>THE DAILY WATER · CLAUDE AI · WATER 4 YOU GMBH · AALEN</footer>
+<footer>THE DAILY WATER · NEWSAPI + CLAUDE AI · WATER 4 YOU GMBH · AALEN</footer>
+
 <div id="modal" onclick="if(event.target===this)closeMod()">
   <div class="modal-sheet">
     <div class="drag-handle"></div>
-    <div class="modal-hdr">
-      <div style="flex:1"><div class="modal-tags" id="mTags"></div><h2 class="modal-title" id="mTitle"></h2></div>
-      <button class="modal-close" onclick="closeMod()">✕</button>
+    <div class="modal-hero-wrap" id="mHeroWrap">
+      <div class="modal-hero-icon" id="mHeroIcon"></div>
     </div>
-    <div class="modal-div" id="mDiv"></div>
-    <p class="modal-sum" id="mSum"></p>
-    <p class="modal-full" id="mFull"></p>
-    <div class="modal-foot"><span>The Daily Water</span><span id="mDate"></span></div>
+    <div class="modal-content">
+      <div class="modal-hdr">
+        <div style="flex:1">
+          <div class="modal-tags" id="mTags"></div>
+          <h2 class="modal-title" id="mTitle"></h2>
+        </div>
+        <button class="modal-close" onclick="closeMod()">✕</button>
+      </div>
+      <div class="modal-div" id="mDiv"></div>
+      <p class="modal-sum" id="mSum"></p>
+      <p class="modal-full" id="mFull"></p>
+      <a id="mLink" class="modal-link" target="_blank" rel="noopener" style="display:none">
+        📰 Originalartikel lesen →
+      </a>
+      <div class="modal-foot">
+        <span id="mSourceDate"></span>
+        <span>The Daily Water · <span id="mDate"></span></span>
+      </div>
+    </div>
   </div>
 </div>
+
 <script>
 const CATS=[
-  {id:"aalen",       label:"Region Aalen",     icon:"📍",bg:"#0e2340",ac:"#3b9eff",
-   p:"Lokalredakteur Region Aalen (Ostalbkreis, BW). 5 Artikel: Lokalpolitik, Wirtschaft, Kultur, Sport, Infrastruktur in Aalen, Ellwangen, Schwäbisch Gmünd."},
-  {id:"deutschland", label:"Deutschland",      icon:"🇩🇪",bg:"#1a0505",ac:"#e63946",
-   p:"Nachrichtenredakteur Deutschland. 5 Artikel: Bundespolitik, Wirtschaft, Gesellschaft, Energie, Recht."},
-  {id:"welt",        label:"Welt",             icon:"🌍",bg:"#0a1a0a",ac:"#52b788",
-   p:"Auslandskorrespondent. 5 Artikel: internationale Politik, Konflikte, Diplomatie, Klimawandel, Wirtschaft."},
-  {id:"water4you",   label:"Water 4 You",      icon:"💧",bg:"#002235",ac:"#00b4d8",
-   p:"Fachredakteur Wasserwirtschaft. 5 Artikel: Trinkwasserqualität, EU-Regulierung, Aufbereitungstechnologie, Wasserknappheit, Infrastruktur."},
-  {id:"zielmaerkte", label:"Zielmärkte W4Y",   icon:"🎯",bg:"#150a2e",ac:"#9b5de5",
-   p:"Marktanalyst Wasserwirtschaft. 5 Artikel: Naher Osten, Afrika, Südostasien, Indien, Lateinamerika — Projekte, Investitionen, Ausschreibungen."},
-  {id:"philippinen", label:"Philippinen",      icon:"🇵🇭",bg:"#1a1200",ac:"#ffd166",
-   p:"Korrespondent Philippinen. 5 Artikel: Politik, Wirtschaft, Wasserinfrastruktur, Naturkatastrophen, internationale Beziehungen."},
-  {id:"business",    label:"Business & Märkte",icon:"📈",bg:"#001a0d",ac:"#06d6a0",
-   p:"Wirtschaftsredakteur. 5 Artikel: M&A-Deals, Unternehmensstrategien, Quartalsergebnisse, Rohstoffe, Handelspolitik."},
-  {id:"ki_tech",     label:"KI & Technologie", icon:"🤖",bg:"#0d001a",ac:"#ff6b9d",
-   p:"Tech-Redakteur. 5 Artikel: neue KI-Modelle, KI-Regulierung, Cybersecurity, Halbleiter, Tech-Konzerne."},
-  {id:"aktien",      label:"Aktien & Finanzen",icon:"💹",bg:"#001508",ac:"#2dc653",
-   p:"Finanzredakteur. 5 Artikel: DAX/Dow/S&P, Wasser-Aktien (Veolia, Xylem, Pentair), Zinspolitik, Währungen, Rohöl."}
+  {id:"aalen",       label:"Region Aalen",     icon:"📍",bg:"#0e2340",ac:"#3b9eff"},
+  {id:"deutschland", label:"Deutschland",      icon:"🇩🇪",bg:"#1a0505",ac:"#e63946"},
+  {id:"welt",        label:"Welt",             icon:"🌍",bg:"#0a1a0a",ac:"#52b788"},
+  {id:"water4you",   label:"Water 4 You",      icon:"💧",bg:"#002235",ac:"#00b4d8"},
+  {id:"zielmaerkte", label:"Zielmärkte W4Y",   icon:"🎯",bg:"#150a2e",ac:"#9b5de5"},
+  {id:"philippinen", label:"Philippinen",      icon:"🇵🇭",bg:"#1a1200",ac:"#ffd166"},
+  {id:"business",    label:"Business & Märkte",icon:"📈",bg:"#001a0d",ac:"#06d6a0"},
+  {id:"ki_tech",     label:"KI & Technologie", icon:"🤖",bg:"#0d001a",ac:"#ff6b9d"},
+  {id:"aktien",      label:"Aktien & Finanzen",icon:"💹",bg:"#001508",ac:"#2dc653"}
 ];
 
-// Strikte sequenzielle Verarbeitung — eine nach der anderen mit Pause
-// Max 1000 output tokens pro Anfrage → bleibt weit unter Rate Limit
-const MAX_TOKENS = 1000;
-const DELAY_MS   = 8000; // 8 Sekunden Pause zwischen Anfragen
+const DELAY_MS = 8000;
+let data = {};
 
-const SYS="Du bist Nachrichtenredakteur. Antworte NUR mit einem JSON-Array, kein Text davor/danach, keine Codeblöcke.";
-let data={};
-
-window.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("dateDisp").textContent=
-    new Date().toLocaleDateString("de-DE",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("dateDisp").textContent =
+    new Date().toLocaleDateString("de-DE", {weekday:"long",year:"numeric",month:"long",day:"numeric"});
 });
 
-async function fetchCat(cat){
-  const d=new Date().toLocaleDateString("de-DE");
-  // Kompakter Prompt → weniger Output-Tokens
-  const msg=cat.p+" Heute: "+d+".\nNUR dieses JSON (5 Objekte):\n[{\"title\":\"max 10 Wörter\",\"category\":\"Wort\",\"summary\":\"2 Sätze.\",\"fullText\":\"5-6 Sätze.\",\"relevance\":\"hoch\"}]";
-  const r=await fetch("/api",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"claude-haiku-4-5-20251001",
-      max_tokens:MAX_TOKENS,
-      system:SYS,
-      messages:[{role:"user",content:msg}]
-    })
+async function fetchCat(cat) {
+  const r = await fetch("/api", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ category: cat.id })
   });
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||"HTTP "+r.status);}
-  const j=await r.json();
-  const raw=(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
-  const s=raw.indexOf("["),e=raw.lastIndexOf("]");
-  if(s<0||e<=s)throw new Error("Kein JSON in Antwort");
-  const arr=JSON.parse(raw.slice(s,e+1));
-  if(!Array.isArray(arr)||!arr.length)throw new Error("Leeres Array");
-  return arr.map(a=>({
-    title:String(a.title||"–"),category:String(a.category||"Allgemein"),
-    summary:String(a.summary||""),fullText:String(a.fullText||a.summary||""),
-    relevance:String(a.relevance||"mittel")
-  }));
+  const j = await r.json();
+  if (!r.ok || j.error) throw new Error(j?.error?.message || "HTTP " + r.status);
+  if (!j.articles?.length) throw new Error("Keine Artikel erhalten");
+  return j.articles;
 }
 
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-async function generateAll(){
-  data={};
-  document.getElementById("empty").style.display="none";
-  document.getElementById("grid").style.display="block";
-  document.getElementById("progressWrap").style.display="block";
+async function generateAll() {
+  data = {};
+  document.getElementById("empty").style.display = "none";
+  document.getElementById("grid").style.display = "block";
+  document.getElementById("progressWrap").style.display = "block";
   buildGrid();
+  const btn = document.getElementById("genBtn");
+  btn.disabled = true;
 
-  const btn=document.getElementById("genBtn");
-  btn.disabled=true;
+  for (let i = 0; i < CATS.length; i++) {
+    const cat = CATS[i];
+    const pct = Math.round((i / CATS.length) * 100);
+    setProgress(pct, (i+1) + "/" + CATS.length + ": " + cat.label + " wird geladen…");
+    updDot(cat.id, "loading");
 
-  // Sequenziell: eine Kategorie nach der anderen
-  for(let i=0;i<CATS.length;i++){
-    const cat=CATS[i];
-    const pct=Math.round((i/CATS.length)*100);
-    setProgress(pct, (i+1)+"/"+CATS.length+": "+cat.label+" wird geladen…");
-    updDot(cat.id,"loading");
-
-    // Warte zwischen Anfragen (außer vor der ersten)
-    if(i>0){
-      // Zeige Countdown
-      for(let s=Math.round(DELAY_MS/1000);s>0;s--){
-        setProgress(pct,"⏳ Kurze Pause… ("+s+"s) — verhindert Rate Limit");
+    if (i > 0) {
+      for (let s = Math.round(DELAY_MS / 1000); s > 0; s--) {
+        setProgress(pct, "⏳ Kurze Pause… " + s + "s");
         await sleep(1000);
       }
     }
 
-    setProgress(pct,(i+1)+"/"+CATS.length+": "+cat.label+"…");
-    try{
-      const arts=await fetchCat(cat);
-      data[cat.id]=arts;
-      updCol(cat,arts,null);
-      updDot(cat.id,"done");
-    }catch(err){
-      updCol(cat,[],err.message);
-      updDot(cat.id,"");
+    try {
+      const arts = await fetchCat(cat);
+      data[cat.id] = arts;
+      updCol(cat, arts, null);
+      updDot(cat.id, "done");
+    } catch(err) {
+      updCol(cat, [], err.message);
+      updDot(cat.id, "");
     }
   }
 
-  setProgress(100,"✅ Alle "+CATS.length+" Kategorien geladen!");
-  btn.disabled=false;
-  btn.textContent="🔄 Neu";
-  setTimeout(()=>{document.getElementById("progressWrap").style.display="none";},3000);
+  setProgress(100, "✅ Alle Kategorien geladen!");
+  btn.disabled = false;
+  btn.textContent = "🔄 Neu laden";
+  setTimeout(() => { document.getElementById("progressWrap").style.display = "none"; }, 2500);
 }
 
-function setProgress(pct,label){
-  document.getElementById("progressFill").style.width=pct+"%";
-  document.getElementById("progressLabel").textContent=label;
-  document.getElementById("genBtn").textContent="⏳ "+pct+"%";
+function setProgress(pct, label) {
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = label;
+  document.getElementById("genBtn").textContent = "⏳ " + pct + "%";
 }
 
-function buildGrid(){
-  const g=document.getElementById("grid");g.innerHTML="";
-  [CATS.slice(0,3),CATS.slice(3,6),CATS.slice(6,9)].forEach(row=>{
-    const r=document.createElement("div");r.className="grid-row";
-    row.forEach(cat=>r.appendChild(mkCol(cat,[],null,"wait")));
+function buildGrid() {
+  const g = document.getElementById("grid"); g.innerHTML = "";
+  [CATS.slice(0,3), CATS.slice(3,6), CATS.slice(6,9)].forEach(row => {
+    const r = document.createElement("div"); r.className = "grid-row";
+    row.forEach(cat => r.appendChild(mkCol(cat, [], null, true)));
     g.appendChild(r);
   });
 }
 
-function mkCol(cat,arts,err,state){
-  const c=document.createElement("div");c.className="col";c.id="col-"+cat.id;
-  c.style.cssText="background:linear-gradient(170deg,"+cat.bg+"f8 0%,"+cat.bg+"88 100%);border:1px solid "+cat.ac+"18";
-  const dotClass=state==="wait"?"waiting":state==="load"?"loading":arts.length?"done":"";
-  c.innerHTML=
-    '<div class="col-hdr" style="border-bottom:1px solid '+cat.ac+'25">'+
-    '<span class="col-icon">'+cat.icon+'</span>'+
-    '<span class="col-title">'+cat.label+'</span>'+
-    '<span class="col-cnt" id="cnt-'+cat.id+'" style="color:'+cat.ac+';background:'+cat.ac+'18"></span>'+
-    '<div class="col-dot '+dotClass+'" id="dot-'+cat.id+'"></div></div>'+
-    '<div id="body-'+cat.id+'">'+(state==="wait"?waitHtml():state==="load"?spinHtml(cat.ac):err?errHtml(err):cardsHtml(cat,arts))+'</div>';
+function mkCol(cat, arts, err, waiting) {
+  const c = document.createElement("div"); c.className = "col"; c.id = "col-" + cat.id;
+  c.style.cssText = "background:linear-gradient(170deg," + cat.bg + "f8 0%," + cat.bg + "88 100%);border:1px solid " + cat.ac + "18";
+  c.innerHTML =
+    '<div class="col-hdr" style="border-bottom:1px solid ' + cat.ac + '25">' +
+    '<span class="col-icon">' + cat.icon + '</span>' +
+    '<span class="col-title">' + cat.label + '</span>' +
+    '<span class="col-cnt" id="cnt-' + cat.id + '" style="color:' + cat.ac + ';background:' + cat.ac + '18"></span>' +
+    '<div class="col-dot" id="dot-' + cat.id + '"></div></div>' +
+    '<div id="body-' + cat.id + '">' + (waiting ? '<div class="wait-wrap">Wartet…</div>' : err ? errHtml(err) : cardsHtml(cat, arts)) + '</div>';
   return c;
 }
 
-function updCol(cat,arts,err){
-  const body=document.getElementById("body-"+cat.id);
-  const cnt=document.getElementById("cnt-"+cat.id);
-  if(cnt&&arts.length)cnt.textContent=arts.length;
-  if(body)body.innerHTML=err?errHtml(err):cardsHtml(cat,arts);
-}
-function updDot(id,state){
-  const d=document.getElementById("dot-"+id);
-  if(d)d.className="col-dot"+(state?" "+state:"");
+function updCol(cat, arts, err) {
+  const body = document.getElementById("body-" + cat.id);
+  const cnt  = document.getElementById("cnt-"  + cat.id);
+  if (cnt && arts.length) cnt.textContent = arts.length;
+  if (body) body.innerHTML = err ? errHtml(err) : cardsHtml(cat, arts);
 }
 
-function waitHtml(){return '<div class="wait-wrap">Wartet…</div>';}
-function spinHtml(ac){return '<div class="spin-wrap"><div class="spin" style="border:2px solid '+ac+'22;border-top:2px solid '+ac+'"></div><div class="spin-lbl">Generiere…</div></div>';}
-function errHtml(m){return '<div class="err-box">⚠ '+esc(m)+'</div>';}
+function updDot(id, state) {
+  const d = document.getElementById("dot-" + id);
+  if (d) d.className = "col-dot" + (state ? " " + state : "");
+}
 
-function cardsHtml(cat,arts){
-  if(!arts.length)return "";
-  let h=arts.slice(0,5).map((a,i)=>cardHtml(cat,a,i)).join("");
-  if(arts.length>5){
-    h+='<div id="hid-'+cat.id+'" style="display:none">'+arts.slice(5).map((a,i)=>cardHtml(cat,a,i+5)).join("")+'</div>';
-    h+='<button class="more-btn" style="border:1px solid '+cat.ac+'28;color:'+cat.ac+'88" onclick="toggleMore(\''+cat.id+'\','+arts.length+')">▼ Alle '+arts.length+' Artikel</button>';
+function errHtml(m) { return '<div class="err-box">⚠ ' + esc(m) + '</div>'; }
+
+function cardsHtml(cat, arts) {
+  if (!arts.length) return "";
+  let h = arts.slice(0, 5).map((a, i) => cardHtml(cat, a, i)).join("");
+  if (arts.length > 5) {
+    h += '<div id="hid-' + cat.id + '" style="display:none">' + arts.slice(5).map((a, i) => cardHtml(cat, a, i+5)).join("") + '</div>';
+    h += '<button class="more-btn" style="border:1px solid ' + cat.ac + '28;color:' + cat.ac + '88" onclick="toggleMore(\'' + cat.id + '\',' + arts.length + ')">▼ Alle ' + arts.length + ' Artikel</button>';
   }
   return h;
 }
-function cardHtml(cat,a,idx){
-  return '<div class="card" style="border-left:3px solid '+cat.ac+'" onclick="openMod(\''+cat.id+'\','+idx+')">'+
-    '<div class="card-meta"><span class="card-cat" style="color:'+cat.ac+';background:'+cat.ac+'20">'+esc(a.category)+'</span>'+
-    (a.relevance==="hoch"?'<span class="card-star">★</span>':'')+
-    '<span class="card-arr">↗</span></div>'+
-    '<div class="card-title">'+esc(a.title)+'</div>'+
-    '<div class="card-sum">'+esc(a.summary)+'</div>'+
-    '<span class="card-more" style="color:'+cat.ac+'70">Weiterlesen →</span></div>';
+
+function cardHtml(cat, a, idx) {
+  const hasImg = a.imageUrl && a.imageUrl.startsWith("http");
+  const imgHtml = hasImg
+    ? '<div class="card-img-wrap"><div class="card-img-icon">' + cat.icon + '</div><img class="card-img" src="' + esc(a.imageUrl) + '" loading="lazy" onload="this.classList.add(\'loaded\')" onerror="this.style.display=\'none\'"></div>'
+    : '';
+  return '<div class="card" style="border-left:3px solid ' + cat.ac + '" onclick="openMod(\'' + cat.id + '\',' + idx + ')">' +
+    imgHtml +
+    '<div class="card-body">' +
+    '<div class="card-meta">' +
+    '<span class="card-cat" style="color:' + cat.ac + ';background:' + cat.ac + '20">' + esc(a.category) + '</span>' +
+    (a.source ? '<span class="card-source">' + esc(a.source) + '</span>' : '') +
+    (a.relevance === "hoch" ? '<span class="card-star">★</span>' : '') +
+    '<span class="card-arr">↗</span></div>' +
+    '<div class="card-title">' + esc(a.title) + '</div>' +
+    '<div class="card-sum">' + esc(a.summary) + '</div>' +
+    '<span class="card-more" style="color:' + cat.ac + '70">Weiterlesen →</span>' +
+    '</div></div>';
 }
-function toggleMore(id,total){
-  const h=document.getElementById("hid-"+id),b=h.nextElementSibling;
-  const show=h.style.display==="none";
-  h.style.display=show?"block":"none";
-  b.textContent=show?"▲ Weniger":"▼ Alle "+total+" Artikel";
+
+function toggleMore(id, total) {
+  const h = document.getElementById("hid-" + id), b = h.nextElementSibling;
+  const show = h.style.display === "none";
+  h.style.display = show ? "block" : "none";
+  b.textContent = show ? "▲ Weniger" : "▼ Alle " + total + " Artikel";
 }
-function openMod(catId,idx){
-  const cat=CATS.find(c=>c.id===catId),a=(data[catId]||[])[idx];
-  if(!cat||!a)return;
-  document.getElementById("mTags").innerHTML=
-    '<span class="modal-tag" style="color:'+cat.ac+';background:'+cat.ac+'22">'+esc(a.category)+'</span>'+
-    '<span class="modal-src">'+cat.icon+' '+cat.label+'</span>'+
-    (a.relevance==="hoch"?'<span style="font-size:10px;color:#ffd166;font-family:monospace">★ TOP</span>':"");
-  document.getElementById("mTitle").textContent=a.title;
-  document.getElementById("mDiv").style.background="linear-gradient(90deg,"+cat.ac+"90,transparent)";
-  const sum=document.getElementById("mSum");
-  sum.textContent=a.summary;sum.style.borderLeftColor=cat.ac+"55";
-  document.getElementById("mFull").textContent=a.fullText;
-  document.getElementById("mDate").textContent=new Date().toLocaleDateString("de-DE");
+
+function openMod(catId, idx) {
+  const cat = CATS.find(c => c.id === catId);
+  const a = (data[catId] || [])[idx];
+  if (!cat || !a) return;
+
+  // Hero image
+  const heroWrap = document.getElementById("mHeroWrap");
+  document.getElementById("mHeroIcon").textContent = cat.icon;
+  const oldImg = heroWrap.querySelector(".modal-hero");
+  if (oldImg) oldImg.remove();
+  if (a.imageUrl && a.imageUrl.startsWith("http")) {
+    const img = document.createElement("img");
+    img.className = "modal-hero";
+    img.src = a.imageUrl;
+    img.alt = "";
+    img.onerror = () => img.remove();
+    heroWrap.appendChild(img);
+  }
+
+  document.getElementById("mTags").innerHTML =
+    '<span class="modal-tag" style="color:' + cat.ac + ';background:' + cat.ac + '22">' + esc(a.category) + '</span>' +
+    '<span class="modal-src-date">' + cat.icon + ' ' + cat.label + '</span>' +
+    (a.relevance === "hoch" ? '<span style="font-size:10px;color:#ffd166;font-family:monospace">★ TOP</span>' : "");
+
+  document.getElementById("mTitle").textContent = a.title;
+  document.getElementById("mDiv").style.background = "linear-gradient(90deg," + cat.ac + "90,transparent)";
+  const sum = document.getElementById("mSum");
+  sum.textContent = a.summary; sum.style.borderLeftColor = cat.ac + "55";
+  document.getElementById("mFull").textContent = a.fullText;
+  document.getElementById("mSourceDate").textContent =
+    (a.source ? "Quelle: " + a.source : "") + (a.date ? " · " + a.date : "");
+  document.getElementById("mDate").textContent = new Date().toLocaleDateString("de-DE");
+
+  // Link to original article
+  const link = document.getElementById("mLink");
+  if (a.articleUrl && a.articleUrl.startsWith("http")) {
+    link.href = a.articleUrl;
+    link.style.display = "inline-block";
+  } else {
+    link.style.display = "none";
+  }
+
   document.getElementById("modal").classList.add("open");
-  document.body.style.overflow="hidden";
+  document.body.style.overflow = "hidden";
 }
-function closeMod(){
+
+function closeMod() {
   document.getElementById("modal").classList.remove("open");
-  document.body.style.overflow="";
+  document.body.style.overflow = "";
 }
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMod();});
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMod(); });
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 </script>
 </body>
 </html>

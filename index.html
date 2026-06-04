@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Daily Water">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050b14">
+<title>The Daily Water</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body{background:#050b14;color:#d8e8f4;font-family:Georgia,serif;min-height:100vh;min-height:100dvh;overscroll-behavior:none}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#050b14}::-webkit-scrollbar-thumb{background:#1a2e40;border-radius:2px}
+
+/* ── HEADER ── */
+header{padding:max(16px,env(safe-area-inset-top)) 18px 13px;border-bottom:1px solid #081828;background:linear-gradient(180deg,#030810,transparent);position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.hdr{max-width:1460px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.masthead-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.28em;color:#0c1c2c;text-transform:uppercase;margin-bottom:3px}
+h1.masthead{font-family:'Playfair Display',serif;font-size:clamp(20px,5vw,40px);font-weight:900;color:#fff;letter-spacing:-.025em;line-height:1}
+.masthead-date{font-family:'Space Mono',monospace;font-size:9px;color:#142535;margin-top:3px}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+#genBtn{background:linear-gradient(135deg,#1a4a8a,#2a7ae0);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 3px 14px rgba(42,122,224,.25);touch-action:manipulation;min-height:44px}
+#genBtn:disabled{background:rgba(59,158,255,.08);color:#1a3a58;box-shadow:none;cursor:not-allowed}
+
+/* ── MAIN ── */
+main{padding:16px 12px max(60px,calc(60px + env(safe-area-inset-bottom)));max-width:1460px;margin:0 auto}
+#empty{text-align:center;padding:80px 20px}
+#empty .emo{font-size:50px;margin-bottom:16px}
+#empty h2{font-family:'Playfair Display',serif;font-size:19px;color:#0e1e2e;margin-bottom:8px}
+#empty p{font-family:'Space Mono',monospace;font-size:10px;color:#091420;line-height:1.9}
+.grid-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+
+/* ── COLUMN ── */
+.col{flex:1 1 280px;min-width:260px;border-radius:14px;padding:16px;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+@media(max-width:580px){.col{min-width:100%}}
+.col-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px}
+.col-icon{font-size:16px;flex-shrink:0}
+.col-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:800;color:#fff;flex:1}
+.col-cnt{font-size:9px;font-family:'Space Mono',monospace;padding:2px 7px;border-radius:10px;flex-shrink:0}
+.col-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#1a2a3a}
+.col-dot.loading{background:#ffd166;box-shadow:0 0 7px #ffd166aa;animation:pulse 1s ease infinite}
+.col-dot.done{background:#2dc653;box-shadow:0 0 6px #2dc653aa}
+
+/* ── CARD ── */
+.card{background:rgba(255,255,255,.027);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:13px 14px;margin-bottom:8px;cursor:pointer;transition:background .12s;touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,255,255,.04);min-height:44px}
+.card:active{background:rgba(255,255,255,.07)}
+.card-meta{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.card-cat{font-size:9px;font-family:'Space Mono',monospace;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.07em}
+.card-star{font-size:9px;color:#ffd166}
+.card-arr{margin-left:auto;opacity:.3;font-size:13px}
+.card-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#ccddf0;margin:0 0 5px;line-height:1.35}
+.card-sum{font-size:11px;color:#3a5570;line-height:1.5;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-more{font-size:10px;font-family:'Space Mono',monospace;opacity:.4}
+.more-btn{background:transparent;width:100%;border-radius:8px;padding:9px 14px;font-size:10px;font-family:'Space Mono',monospace;cursor:pointer;margin-top:4px;touch-action:manipulation;min-height:40px}
+
+.err-box{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.22);border-radius:8px;padding:12px;color:#cc5060;font-size:11px;font-family:'Space Mono',monospace;line-height:1.6;word-break:break-word}
+.spin-wrap{text-align:center;padding:30px 0}
+.spin{display:inline-block;width:26px;height:26px;border-radius:50%;animation:spin .8s linear infinite}
+.spin-lbl{font-size:10px;font-family:'Space Mono',monospace;color:#243448;margin-top:10px}
+
+/* ── MODAL (Bottom Sheet on mobile) ── */
+#modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#modal.open{display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:601px){#modal.open{align-items:center;padding:20px}}
+.modal-sheet{background:#0b1220;border-radius:22px 22px 0 0;width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;padding:0 22px max(32px,env(safe-area-inset-bottom));box-shadow:0 -20px 60px rgba(0,0,0,.8);animation:slideUp .28s cubic-bezier(.32,1,.36,1)}
+@media(min-width:601px){.modal-sheet{border-radius:18px;max-width:720px;padding:32px 36px;animation:fadeUp .2s ease}}
+.drag-handle{width:36px;height:4px;background:#1e2e3e;border-radius:2px;margin:14px auto 18px}
+@media(min-width:601px){.drag-handle{display:none}}
+.modal-hdr{display:flex;justify-content:space-between;gap:14px;margin-bottom:16px;align-items:flex-start}
+.modal-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.modal-tag{font-size:10px;font-family:'Space Mono',monospace;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.1em}
+.modal-src{font-size:10px;color:#2a4060;font-family:'Space Mono',monospace;padding:3px 5px}
+.modal-title{font-family:'Playfair Display',serif;font-size:clamp(16px,3vw,22px);font-weight:800;color:#f0f6ff;line-height:1.3}
+.modal-close{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#6a8aaa;min-width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;flex-shrink:0}
+.modal-div{height:1px;margin-bottom:18px}
+.modal-sum{font-size:15px;color:#b8ccdf;line-height:1.8;border-left:3px solid transparent;padding-left:16px;margin-bottom:18px;font-style:italic}
+.modal-full{font-size:14px;color:#7a90a8;line-height:1.9}
+.modal-foot{margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);font-family:'Space Mono',monospace;font-size:10px;color:#1a2a3a;display:flex;justify-content:space-between}
+
+footer{border-top:1px solid #060e18;padding:12px 18px max(12px,env(safe-area-inset-bottom));text-align:center;font-family:'Space Mono',monospace;font-size:8px;color:#060e18;letter-spacing:.18em}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div>
+      <div class="masthead-label">Daily Intelligence · Water 4 You GmbH</div>
+      <h1 class="masthead">The Daily Water</h1>
+      <div class="masthead-date" id="dateDisp"></div>
+    </div>
+    <div class="hdr-btns">
+      <button id="genBtn" onclick="generateAll()">📰 Generieren</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="empty">
+    <div class="emo">📰</div>
+    <h2>Bereit für die heutige Ausgabe</h2>
+    <p>9 Kategorien · 10 Artikel je Kategorie<br>Artikel antippen für Volltext</p>
+  </div>
+  <div id="grid" style="display:none"></div>
+</main>
+
+<footer>THE DAILY WATER · CLAUDE AI · WATER 4 YOU GMBH · AALEN</footer>
+
+<div id="modal" onclick="if(event.target===this)closeMod()">
+  <div class="modal-sheet">
+    <div class="drag-handle"></div>
+    <div class="modal-hdr">
+      <div style="flex:1">
+        <div class="modal-tags" id="mTags"></div>
+        <h2 class="modal-title" id="mTitle"></h2>
+      </div>
+      <button class="modal-close" onclick="closeMod()">✕</button>
+    </div>
+    <div class="modal-div" id="mDiv"></div>
+    <p class="modal-sum" id="mSum"></p>
+    <p class="modal-full" id="mFull"></p>
+    <div class="modal-foot"><span>The Daily Water</span><span id="mDate"></span></div>
+  </div>
+</div>
+
+<script>
+const CATS=[
+  {id:"aalen",       label:"Region Aalen",     icon:"📍",bg:"#0e2340",ac:"#3b9eff",
+   p:"Du bist Lokalredakteur für die Region Aalen (Ostalbkreis, BW). Erstelle 10 Nachrichtenartikel: Lokalpolitik, Stadtentwicklung, Wirtschaft, Kultur, Sport, Verkehr, Umwelt in Aalen, Ellwangen, Schwäbisch Gmünd, Heidenheim."},
+  {id:"deutschland", label:"Deutschland",      icon:"🇩🇪",bg:"#1a0505",ac:"#e63946",
+   p:"Du bist Nachrichtenredakteur. Erstelle 10 aktuelle Artikel zu Deutschland: Bundespolitik, Koalition, Wirtschaft, Gesellschaft, Recht, Energie, Umwelt, Soziales."},
+  {id:"welt",        label:"Welt",             icon:"🌍",bg:"#0a1a0a",ac:"#52b788",
+   p:"Du bist Auslandskorrespondent. Erstelle 10 aktuelle Weltartikel: internationale Politik, Konflikte, Diplomatie, Klimawandel, globale Wirtschaft, humanitäre Themen."},
+  {id:"water4you",   label:"Water 4 You",      icon:"💧",bg:"#002235",ac:"#00b4d8",
+   p:"Du bist Fachredakteur für Wasserwirtschaft. Erstelle 10 Artikel relevant für Wasserversorgung: Trinkwasserqualität, EU-Wasserrahmenrichtlinie, Aufbereitungstechnologien, Wasserknappheit, kommunale Wasserwirtschaft, Klimawandel, Regulierung, Infrastruktur."},
+  {id:"zielmaerkte", label:"Zielmärkte W4Y",   icon:"🎯",bg:"#150a2e",ac:"#9b5de5",
+   p:"Du bist Marktanalyst für Wasserwirtschaft. Erstelle 10 Artikel über Zielmärkte: Naher Osten (Saudi-Arabien, VAE, Katar, Oman), Afrika, Südostasien (Vietnam, Indonesien), Indien, Lateinamerika — Ausschreibungen, PPP-Projekte, Investitionen."},
+  {id:"philippinen", label:"Philippinen",      icon:"🇵🇭",bg:"#1a1200",ac:"#ffd166",
+   p:"Du bist Korrespondent auf den Philippinen. Erstelle 10 aktuelle Artikel: Politik, Wirtschaft, Wasserinfrastruktur, Naturkatastrophen, Südchinesisches Meer, internationale Beziehungen."},
+  {id:"business",    label:"Business & Märkte",icon:"📈",bg:"#001a0d",ac:"#06d6a0",
+   p:"Du bist Wirtschaftsredakteur. Erstelle 10 aktuelle Business-Artikel: M&A-Deals, Unternehmensstrategien, CEO-Wechsel, Quartalsergebnisse, Rohstoffmärkte, Handelsabkommen — konkrete Unternehmen und Zahlen."},
+  {id:"ki_tech",     label:"KI & Technologie", icon:"🤖",bg:"#0d001a",ac:"#ff6b9d",
+   p:"Du bist Tech-Redakteur. Erstelle 10 aktuelle Artikel: neue KI-Modelle (OpenAI, Anthropic, Google, Meta), KI-Regulierung EU/USA, KI in der Industrie, Cybersecurity, Halbleiter, Big Tech, Startups."},
+  {id:"aktien",      label:"Aktien & Finanzen",icon:"💹",bg:"#001508",ac:"#2dc653",
+   p:"Du bist Finanzredakteur. Erstelle 10 aktuelle Artikel: DAX/Dow Jones/S&P 500/Nikkei, Wasser-Aktien (Veolia, Xylem, Pentair, American Water Works), Zinspolitik EZB/Fed, EUR/USD, Rohöl, Gold, Bitcoin — realistische Kursniveaus."}
+];
+const SYS="Du bist ein professioneller Nachrichtenredakteur. Du antwortest AUSSCHLIESSLICH mit einem validen JSON-Array. Kein Text davor oder danach, keine Markdown-Codeblöcke. Nur das JSON-Array beginnend mit [ und endend mit ].";
+let data={},pending=new Set();
+
+window.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("dateDisp").textContent=
+    new Date().toLocaleDateString("de-DE",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+});
+
+async function fetchCat(cat){
+  const d=new Date().toLocaleDateString("de-DE");
+  const msg=cat.p+"\n\nHeute: "+d+". GENAU 10 Artikel als JSON-Array:\n[{\"title\":\"...\",\"category\":\"...\",\"summary\":\"2-3 Sätze.\",\"fullText\":\"8-10 Sätze.\",\"relevance\":\"hoch\"}]";
+  const r=await fetch("/api",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:6000,system:SYS,messages:[{role:"user",content:msg}]})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||"HTTP "+r.status);}
+  const j=await r.json();
+  const raw=(j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("").trim();
+  const s=raw.indexOf("["),e=raw.lastIndexOf("]");
+  if(s<0||e<=s)throw new Error("Kein JSON in Antwort");
+  const arr=JSON.parse(raw.slice(s,e+1));
+  if(!Array.isArray(arr)||!arr.length)throw new Error("Leeres Array");
+  return arr.map(a=>({title:String(a.title||"–"),category:String(a.category||"Allgemein"),summary:String(a.summary||""),fullText:String(a.fullText||a.summary||""),relevance:String(a.relevance||"mittel")}));
+}
+
+function generateAll(){
+  data={};pending=new Set(CATS.map(c=>c.id));
+  document.getElementById("empty").style.display="none";
+  document.getElementById("grid").style.display="block";
+  buildGrid();
+  const btn=document.getElementById("genBtn");
+  btn.disabled=true;btn.textContent="⏳ 0/"+CATS.length+"…";
+  CATS.forEach((cat,i)=>setTimeout(()=>{
+    fetchCat(cat)
+      .then(arts=>{data[cat.id]=arts;pending.delete(cat.id);updCol(cat,arts,null);updBtn();})
+      .catch(err=>{pending.delete(cat.id);updCol(cat,[],err.message);updBtn();});
+  },i*700));
+}
+function updBtn(){
+  const done=CATS.length-pending.size,btn=document.getElementById("genBtn");
+  if(!pending.size){btn.disabled=false;btn.textContent="🔄 Neu";}
+  else btn.textContent="⏳ "+done+"/"+CATS.length+"…";
+}
+function buildGrid(){
+  const g=document.getElementById("grid");g.innerHTML="";
+  [CATS.slice(0,3),CATS.slice(3,6),CATS.slice(6,9)].forEach(row=>{
+    const r=document.createElement("div");r.className="grid-row";
+    row.forEach(cat=>r.appendChild(mkCol(cat,[],null,true)));
+    g.appendChild(r);
+  });
+}
+function mkCol(cat,arts,err,loading){
+  const c=document.createElement("div");c.className="col";c.id="col-"+cat.id;
+  c.style.cssText="background:linear-gradient(170deg,"+cat.bg+"f8 0%,"+cat.bg+"88 100%);border:1px solid "+cat.ac+"18";
+  c.innerHTML='<div class="col-hdr" style="border-bottom:1px solid '+cat.ac+'25">'+
+    '<span class="col-icon">'+cat.icon+'</span><span class="col-title">'+cat.label+'</span>'+
+    '<span class="col-cnt" id="cnt-'+cat.id+'" style="color:'+cat.ac+';background:'+cat.ac+'18"></span>'+
+    '<div class="col-dot'+(loading?" loading":arts.length?" done":"")+'" id="dot-'+cat.id+'"></div></div>'+
+    '<div id="body-'+cat.id+'">'+(loading?spinHtml(cat.ac):err?errHtml(err):cardsHtml(cat,arts))+'</div>';
+  return c;
+}
+function updCol(cat,arts,err){
+  const dot=document.getElementById("dot-"+cat.id);
+  const body=document.getElementById("body-"+cat.id);
+  const cnt=document.getElementById("cnt-"+cat.id);
+  if(dot)dot.className="col-dot "+(err?"":"done");
+  if(cnt&&arts.length)cnt.textContent=arts.length;
+  if(body)body.innerHTML=err?errHtml(err):cardsHtml(cat,arts);
+}
+function spinHtml(ac){return '<div class="spin-wrap"><div class="spin" style="border:2px solid '+ac+'22;border-top:2px solid '+ac+'"></div><div class="spin-lbl">Generiere Artikel…</div></div>';}
+function errHtml(m){return '<div class="err-box">⚠ '+esc(m)+'</div>';}
+function cardsHtml(cat,arts){
+  if(!arts.length)return "";
+  let h=arts.slice(0,5).map((a,i)=>cardHtml(cat,a,i)).join("");
+  if(arts.length>5){
+    h+='<div id="hid-'+cat.id+'" style="display:none">'+arts.slice(5).map((a,i)=>cardHtml(cat,a,i+5)).join("")+'</div>';
+    h+='<button class="more-btn" style="border:1px solid '+cat.ac+'28;color:'+cat.ac+'88" onclick="toggleMore(\''+cat.id+'\','+arts.length+')">▼ Alle '+arts.length+' Artikel</button>';
+  }
+  return h;
+}
+function cardHtml(cat,a,idx){
+  return '<div class="card" style="border-left:3px solid '+cat.ac+'" onclick="openMod(\''+cat.id+'\','+idx+')">'+
+    '<div class="card-meta"><span class="card-cat" style="color:'+cat.ac+';background:'+cat.ac+'20">'+esc(a.category)+'</span>'+
+    (a.relevance==="hoch"?'<span class="card-star">★</span>':'')+
+    '<span class="card-arr">↗</span></div>'+
+    '<div class="card-title">'+esc(a.title)+'</div>'+
+    '<div class="card-sum">'+esc(a.summary)+'</div>'+
+    '<span class="card-more" style="color:'+cat.ac+'70">Weiterlesen →</span></div>';
+}
+function toggleMore(id,total){
+  const h=document.getElementById("hid-"+id),b=h.nextElementSibling;
+  const show=h.style.display==="none";
+  h.style.display=show?"block":"none";
+  b.textContent=show?"▲ Weniger":"▼ Alle "+total+" Artikel";
+}
+function openMod(catId,idx){
+  const cat=CATS.find(c=>c.id===catId),a=(data[catId]||[])[idx];
+  if(!cat||!a)return;
+  document.getElementById("mTags").innerHTML=
+    '<span class="modal-tag" style="color:'+cat.ac+';background:'+cat.ac+'22">'+esc(a.category)+'</span>'+
+    '<span class="modal-src">'+cat.icon+' '+cat.label+'</span>'+
+    (a.relevance==="hoch"?'<span style="font-size:10px;color:#ffd166;font-family:monospace">★ TOP</span>':"");
+  document.getElementById("mTitle").textContent=a.title;
+  document.getElementById("mDiv").style.background="linear-gradient(90deg,"+cat.ac+"90,transparent)";
+  const sum=document.getElementById("mSum");
+  sum.textContent=a.summary;sum.style.borderLeftColor=cat.ac+"55";
+  document.getElementById("mFull").textContent=a.fullText;
+  document.getElementById("mDate").textContent=new Date().toLocaleDateString("de-DE");
+  document.getElementById("modal").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeMod(){
+  document.getElementById("modal").classList.remove("open");
+  document.body.style.overflow="";
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMod();});
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+</script>
+</body>
+</html>

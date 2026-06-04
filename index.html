@@ -161,7 +161,7 @@ const CATS=[
   {id:"aktien",      label:"Aktien & Finanzen",icon:"💹",bg:"#001508",ac:"#2dc653"}
 ];
 
-const DELAY_MS = 8000;
+const DELAY_MS = 15000;
 let data = {};
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -170,7 +170,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchCat(cat) {
-  const r = await fetch("/api", {
+  const r = await fetch("/api/news", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({ category: cat.id })

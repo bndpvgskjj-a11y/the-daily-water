@@ -1,36 +1,116 @@
 // The Daily Water – Vercel Serverless Function
-// Primär: Echte Artikel von GNews
-// Fallback: Claude generiert aus eigenem Wissen wenn GNews fehlschlägt
+// The Guardian API (primär) + GNews (sekundär) + Claude Zusammenfassung
 
 export const config = { maxDuration: 60 };
 
-const GNEWS = "https://gnews.io/api/v4";
+// The Guardian API - kostenlos, zuverlässig, kein Query-Format-Problem
+const GUARDIAN = "https://content.guardianapis.com/search";
+
+// GNews als Backup
+const GNEWS = "https://gnews.io/api/v4/search";
 
 const CATS = {
-  aalen:       { q:"Aalen",          lang:"de", ctx:"Lokalnachrichten aus Aalen, Ostalbkreis, Baden-Württemberg" },
-  deutschland: { q:"Germany",        lang:"en", ctx:"Wichtigste aktuelle Nachrichten aus Deutschland" },
-  welt:        { q:"world",          lang:"en", ctx:"Wichtigste weltweite Nachrichten und Ereignisse" },
-  water4you:   { q:"water",          lang:"en", ctx:"Wasserversorgung, Trinkwasser, Wasserwirtschaft – für Water 4 You GmbH Aalen" },
-  zielmaerkte: { q:"infrastructure", lang:"en", ctx:"Wasser- und Infrastrukturprojekte in Naher Osten, Afrika, Asien, Lateinamerika" },
-  philippinen: { q:"Philippines",    lang:"en", ctx:"Aktuelle Nachrichten aus den Philippinen" },
-  business:    { q:"business",       lang:"en", ctx:"Wirtschaft, Unternehmen, Märkte, M&A" },
-  ki_tech:     { q:"technology",     lang:"en", ctx:"KI und Technologie – neue Modelle, Regulierung, Startups" },
-  aktien:      { q:"stocks",         lang:"en", ctx:"Aktienmarkt, DAX, Börse, Finanzen, Zinsen" },
+  aalen: {
+    guardian: null, // Guardian hat keine Lokalnachrichten Aalen
+    gnews:    { q: "Aalen", lang: "de" },
+    ctx: "Lokalnachrichten aus Aalen, Ostalbkreis, Baden-Württemberg"
+  },
+  deutschland: {
+    guardian: { q: "Germany", section: "world" },
+    gnews:    { q: "Germany", lang: "en" },
+    ctx: "Wichtigste aktuelle Nachrichten aus Deutschland"
+  },
+  welt: {
+    guardian: { q: "world news", section: "world" },
+    gnews:    { q: "world", lang: "en" },
+    ctx: "Wichtigste weltweite Nachrichten"
+  },
+  water4you: {
+    guardian: { q: "water supply drinking water", section: "environment" },
+    gnews:    { q: "water", lang: "en" },
+    ctx: "Wasserversorgung, Trinkwasser, Wasserwirtschaft – Water 4 You GmbH"
+  },
+  zielmaerkte: {
+    guardian: { q: "water infrastructure Middle East Africa Asia" },
+    gnews:    { q: "infrastructure", lang: "en" },
+    ctx: "Wasser-Infrastrukturprojekte in Naher Osten, Afrika, Asien, Lateinamerika"
+  },
+  philippinen: {
+    guardian: { q: "Philippines", section: "world" },
+    gnews:    { q: "Philippines", lang: "en" },
+    ctx: "Aktuelle Nachrichten aus den Philippinen"
+  },
+  business: {
+    guardian: { q: "business economy", section: "business" },
+    gnews:    { q: "business", lang: "en" },
+    ctx: "Wirtschaft, Business, Märkte, Unternehmen"
+  },
+  ki_tech: {
+    guardian: { q: "artificial intelligence technology", section: "technology" },
+    gnews:    { q: "technology", lang: "en" },
+    ctx: "KI und Technologie – neue Modelle, Regulierung, Startups"
+  },
+  aktien: {
+    guardian: { q: "stock market finance DAX", section: "business" },
+    gnews:    { q: "stocks", lang: "en" },
+    ctx: "Aktienmarkt, Börse, DAX, Finanzen, Zinsen"
+  }
 };
 
-const FALLBACK_PROMPTS = {
-  aalen:       "Erstelle 5 realistische aktuelle Lokalnachrichten für die Region Aalen (Ostalbkreis, Baden-Württemberg): Stadtpolitik, Wirtschaft, Kultur, Sport, Infrastruktur.",
-  deutschland: "Erstelle 5 realistische aktuelle Nachrichten aus Deutschland: Bundespolitik, Wirtschaft, Gesellschaft, Energie, Recht.",
-  welt:        "Erstelle 5 realistische aktuelle Weltnachrichten: internationale Politik, Konflikte, Diplomatie, Klimawandel, Wirtschaft.",
-  water4you:   "Erstelle 5 realistische aktuelle Nachrichten zur Wasserwirtschaft: Trinkwasserqualität, EU-Regulierung, Aufbereitungstechnologie, Wasserknappheit, Infrastrukturprojekte.",
-  zielmaerkte: "Erstelle 5 realistische aktuelle Nachrichten über Wasser-Infrastrukturprojekte in: Naher Osten (Saudi-Arabien, VAE), Afrika, Südostasien, Indien, Lateinamerika.",
-  philippinen: "Erstelle 5 realistische aktuelle Nachrichten aus den Philippinen: Politik, Wirtschaft, Naturereignisse, internationale Beziehungen, Infrastruktur.",
-  business:    "Erstelle 5 realistische aktuelle Business-Nachrichten: M&A-Deals, Quartalsergebnisse, CEO-Wechsel, Rohstoffe, globale Wirtschaftstrends.",
-  ki_tech:     "Erstelle 5 realistische aktuelle KI- und Tech-Nachrichten: neue KI-Modelle, Regulierung EU/USA, Cybersecurity, Halbleiter, Big Tech.",
-  aktien:      "Erstelle 5 realistische aktuelle Finanznachrichten: DAX/Dow/S&P 500 Entwicklungen, Wasser-Aktien (Veolia, Xylem), Zinspolitik EZB/Fed, Rohöl, Gold.",
-};
+async function fetchGuardian(apiKey, params) {
+  const p = new URLSearchParams({
+    "api-key": apiKey,
+    "show-fields": "thumbnail,trailText,bodyText",
+    "page-size": "8",
+    "order-by": "newest",
+    ...params
+  });
+  const r = await fetch(GUARDIAN + "?" + p);
+  const d = await r.json();
+  if (!r.ok || d.response?.status !== "ok") return [];
+  return (d.response?.results || [])
+    .filter(a => a.webTitle && (a.fields?.trailText || a.fields?.bodyText))
+    .slice(0, 6)
+    .map(a => ({
+      title:       a.webTitle,
+      description: a.fields?.trailText || a.fields?.bodyText?.slice(0, 300) || "",
+      image:       a.fields?.thumbnail || "",
+      url:         a.webUrl,
+      source:      "The Guardian",
+      date:        (a.webPublicationDate || "").slice(0, 10)
+    }));
+}
 
-async function callClaude(apiKey, system, user, retries = 2) {
+async function fetchGNews(apiKey, params) {
+  const p = new URLSearchParams({
+    apikey: apiKey,
+    max: "8",
+    sortby: "publishedAt",
+    ...params
+  });
+  const r = await fetch(GNEWS + "?" + p);
+  const text = await r.text();
+  let d;
+  try { d = JSON.parse(text); } catch { return []; }
+  if (!r.ok || d.errors) return [];
+  return (d.articles || [])
+    .filter(a => a.title && a.description && !a.title.includes("[Removed]"))
+    .slice(0, 6)
+    .map(a => ({
+      title:       a.title,
+      description: a.description || "",
+      image:       a.image || "",
+      url:         a.url,
+      source:      a.source?.name || "GNews",
+      date:        (a.publishedAt || "").slice(0, 10)
+    }));
+}
+
+async function callClaude(apiKey, articles, ctx, retries = 2) {
+  const input = articles.map((a, i) =>
+    `[${i+1}] ${a.title}\nQuelle: ${a.source} | ${a.date}\n${a.description}\nBild: ${a.image}\nURL: ${a.url}`
+  ).join("\n\n");
+
   for (let i = 0; i <= retries; i++) {
     if (i > 0) await new Promise(r => setTimeout(r, 5000 * i));
     const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -42,30 +122,26 @@ async function callClaude(apiKey, system, user, retries = 2) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 2500,
-        system,
-        messages: [{ role: "user", content: user }]
+        max_tokens: 3000,
+        system: "Antworte NUR mit einem JSON-Array. Kein Text davor/danach. Keine Codeblöcke. Nur [ ... ].",
+        messages: [{
+          role: "user",
+          content: `Kontext: ${ctx}\n\n${articles.length} echte Artikel:\n\n${input}\n\nJSON-Array auf Deutsch:\n[{"title":"Titel auf Deutsch max 12 Wörter","category":"Thema","source":"Quellenname","date":"TT.MM.JJJJ","summary":"2-3 Sätze auf Deutsch.","fullText":"6-8 Sätze auf Deutsch.","relevance":"hoch","imageUrl":"Bild-URL","articleUrl":"Artikel-URL"}]`
+        }]
       })
     });
     const d = await r.json();
     if (r.status === 429 && i < retries) continue;
     if (!r.ok) throw new Error("Claude " + r.status + ": " + (d?.error?.message || "Fehler"));
-    return (d.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
+    const raw = (d.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
+    const s = raw.indexOf("["), e = raw.lastIndexOf("]");
+    if (s < 0 || e <= s) throw new Error("Kein JSON. Claude: \"" + raw.slice(0, 150) + "\"");
+    const result = JSON.parse(raw.slice(s, e + 1));
+    if (!Array.isArray(result) || !result.length) throw new Error("Leeres Array.");
+    return result;
   }
-  throw new Error("Claude Rate-Limit. Bitte 1 Minute warten.");
+  throw new Error("Rate-Limit. Bitte 1 Minute warten.");
 }
-
-function parseJSON(raw) {
-  const s = raw.indexOf("[");
-  const e = raw.lastIndexOf("]");
-  if (s < 0 || e <= s) throw new Error("Kein JSON-Array in Antwort: \"" + raw.slice(0, 150) + "\"");
-  const arr = JSON.parse(raw.slice(s, e + 1));
-  if (!Array.isArray(arr) || !arr.length) throw new Error("Leeres Array.");
-  return arr;
-}
-
-const JSON_SCHEMA = '[{"title":"Titel auf Deutsch max 12 Wörter","category":"Thema","source":"Quellenname","date":"TT.MM.JJJJ","summary":"2-3 Sätze auf Deutsch.","fullText":"6-8 Sätze auf Deutsch.","relevance":"hoch","imageUrl":"","articleUrl":""}]';
-const SYSTEM_PROMPT = "Du antwortest AUSSCHLIESSLICH mit einem validen JSON-Array. Kein Text davor oder danach. Keine Codeblöcke. Nur [ ... ].";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -74,77 +150,52 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") { res.status(200).end(); return; }
   if (req.method !== "POST")    { res.status(405).end(); return; }
 
-  const AKEY = process.env.ANTHROPIC_API_KEY;
-  const GKEY = process.env.GNEWS_API_KEY;
+  const AKEY     = process.env.ANTHROPIC_API_KEY;
+  const GKEY     = process.env.GNEWS_API_KEY;
+  const GUARDIAN_KEY = process.env.GUARDIAN_API_KEY;
 
-  if (!AKEY) { res.status(500).json({ error: { message: "ANTHROPIC_API_KEY fehlt in Vercel → Settings → Environment Variables" } }); return; }
+  if (!AKEY) {
+    res.status(500).json({ error: { message: "ANTHROPIC_API_KEY fehlt in Vercel → Settings → Environment Variables" } });
+    return;
+  }
 
   const { category } = req.body || {};
   const cat = CATS[category];
   if (!cat) { res.status(400).json({ error: { message: "Unbekannte Kategorie: " + category } }); return; }
 
-  // ── Versuch 1: GNews + Claude ─────────────────────────────────────────
-  if (GKEY && GKEY.length > 20) {
-    try {
-      const params = new URLSearchParams({
-        apikey: GKEY,
-        q:      cat.q,
-        lang:   cat.lang,
-        max:    "8",
-        sortby: "publishedAt"
-      });
-      const nr = await fetch(GNEWS + "/search?" + params);
-      const bodyText = await nr.text();
-      const nd = JSON.parse(bodyText);
-
-      if (nr.ok && !nd.errors && nd.articles?.length > 0) {
-        const arts = nd.articles
-          .filter(a => a.title && a.description && !a.title.includes("[Removed]"))
-          .slice(0, 6);
-
-        if (arts.length > 0) {
-          const input = arts.map((a, i) =>
-            "[" + (i+1) + "] " + a.title +
-            "\nSource: " + (a.source?.name || "–") +
-            " | " + (a.publishedAt || "").slice(0, 10) +
-            "\n" + (a.description || "") +
-            "\nImage: " + (a.image || "") +
-            "\nURL: " + (a.url || "")
-          ).join("\n\n");
-
-          const raw = await callClaude(
-            AKEY,
-            SYSTEM_PROMPT,
-            "Kontext: " + cat.ctx + "\n\n" + arts.length + " echte Artikel:\n\n" + input + "\n\nJSON auf Deutsch:\n" + JSON_SCHEMA
-          );
-
-          const result = parseJSON(raw);
-          res.status(200).json({ articles: result, source: "gnews" });
-          return;
-        }
-      }
-      // GNews hat Fehler → Fallback
-      console.log("[daily-water] GNews Fehler für", category, "→ Fallback. Body:", bodyText.slice(0, 200));
-    } catch(e) {
-      console.log("[daily-water] GNews Exception für", category, "→ Fallback:", e.message);
-    }
-  }
-
-  // ── Fallback: Claude aus eigenem Wissen ───────────────────────────────
   try {
-    const today = new Date().toLocaleDateString("de-DE");
-    const raw = await callClaude(
-      AKEY,
-      SYSTEM_PROMPT,
-      FALLBACK_PROMPTS[category] +
-      "\nHeutiges Datum: " + today +
-      "\nAntworte NUR mit diesem JSON-Array (5 Objekte):\n" + JSON_SCHEMA
-    );
+    let articles = [];
+    let usedSource = "";
 
-    const result = parseJSON(raw);
-    res.status(200).json({ articles: result, source: "claude-fallback" });
+    // ── 1. The Guardian (wenn Key vorhanden und Kategorie supported) ──────
+    if (GUARDIAN_KEY && cat.guardian) {
+      articles = await fetchGuardian(GUARDIAN_KEY, cat.guardian);
+      if (articles.length > 0) usedSource = "guardian";
+    }
 
-  } catch(err) {
+    // ── 2. GNews (wenn Guardian leer oder kein Key) ───────────────────────
+    if (articles.length === 0 && GKEY && cat.gnews) {
+      articles = await fetchGNews(GKEY, cat.gnews);
+      if (articles.length > 0) usedSource = "gnews";
+    }
+
+    // ── 3. Fehler wenn keine Artikel ─────────────────────────────────────
+    if (articles.length === 0) {
+      const missing = [];
+      if (!GUARDIAN_KEY) missing.push("GUARDIAN_API_KEY");
+      if (!GKEY)         missing.push("GNEWS_API_KEY");
+      throw new Error(
+        missing.length > 0
+          ? "Keine News-API Keys gefunden. Bitte in Vercel eintragen: " + missing.join(" und/oder ")
+          : "Keine Artikel von News-APIs erhalten. Bitte Keys prüfen."
+      );
+    }
+
+    // ── 4. Claude fasst zusammen ──────────────────────────────────────────
+    const result = await callClaude(AKEY, articles, cat.ctx);
+    res.status(200).json({ articles: result, source: usedSource });
+
+  } catch (err) {
     console.error("[daily-water]", category, err.message);
     res.status(500).json({ error: { message: err.message } });
   }

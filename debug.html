@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debug – The Daily Water</title>
+<style>
+body{background:#050b14;color:#d8e8f4;font-family:monospace;padding:20px;font-size:13px}
+h2{color:#fff;margin-bottom:16px}
+button{background:#1a4a8a;color:#fff;border:none;border-radius:8px;padding:12px 20px;font-family:monospace;font-size:13px;cursor:pointer;margin:4px;min-height:44px}
+.box{background:#0a1525;border:1px solid #1a2e40;border-radius:8px;padding:16px;margin:12px 0;white-space:pre-wrap;word-break:break-all;line-height:1.6;max-height:300px;overflow-y:auto}
+.ok{border-color:#2dc653;color:#2dc653}
+.err{border-color:#e63946;color:#e63946}
+.info{border-color:#3b9eff;color:#aac}
+label{color:#aaa;display:block;margin-bottom:6px}
+</style>
+</head>
+<body>
+<h2>🔧 Daily Water – API Debugger</h2>
+
+<div>
+  <label>Test 1: Vercel API direkt aufrufen (/api endpoint)</label>
+  <button onclick="testVercel()">Test /api Endpunkt</button>
+</div>
+<div id="r1" class="box info">Noch nicht getestet…</div>
+
+<div>
+  <label>Test 2: GNews direkt vom Browser (zeigt ob Key problem)</label>
+  <button onclick="testGNews()">Test GNews direkt</button>
+</div>
+<div id="r2" class="box info">Noch nicht getestet…</div>
+
+<div>
+  <label>Test 3: Alle Kategorien einzeln</label>
+  <button onclick="testAll()">Alle 9 Kategorien testen</button>
+</div>
+<div id="r3" class="box info">Noch nicht getestet…</div>
+
+<script>
+async function testVercel() {
+  const box = document.getElementById('r1');
+  box.className = 'box info';
+  box.textContent = 'Läuft…';
+  try {
+    const r = await fetch('/api', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({category: 'welt'})
+    });
+    const text = await r.text();
+    box.className = r.ok ? 'box ok' : 'box err';
+    box.textContent = 'HTTP ' + r.status + '\n\n' + text.slice(0, 1000);
+  } catch(e) {
+    box.className = 'box err';
+    box.textContent = 'FEHLER: ' + e.message;
+  }
+}
+
+async function testGNews() {
+  const box = document.getElementById('r2');
+  box.className = 'box info';
+  box.textContent = 'Läuft… (GNews direkt vom Browser)';
+  
+  // Wir können GNews nicht direkt vom Browser aufrufen (CORS)
+  // Stattdessen testen wir ob der Fehler im Vercel-Log erscheint
+  box.textContent = 'GNews hat CORS-Schutz → kann nicht direkt vom Browser getestet werden.\n\nBitte prüfe stattdessen:\n\n1. Vercel Dashboard → dein Projekt → Logs\n2. Dort siehst du die genaue Fehlermeldung\n3. Suche nach "[daily-water]" in den Logs\n\nODER: Teste deinen GNews Key unter:\nhttps://gnews.io/api/v4/search?q=world&lang=en&max=1&apikey=DEIN_KEY\n\nErsetze DEIN_KEY mit deinem echten Key und öffne die URL im Browser.';
+  box.className = 'box info';
+}
+
+async function testAll() {
+  const box = document.getElementById('r3');
+  box.className = 'box info';
+  box.textContent = 'Teste alle Kategorien…\n';
+  
+  const cats = ['aalen','deutschland','welt','water4you','zielmaerkte','philippinen','business','ki_tech','aktien'];
+  
+  for (const cat of cats) {
+    box.textContent += '\n→ ' + cat + ': läuft…';
+    try {
+      const r = await fetch('/api', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({category: cat})
+      });
+      const j = await r.json();
+      if (j.error) {
+        box.textContent += '\n❌ ' + cat + ': ' + j.error.message;
+      } else {
+        box.textContent += '\n✅ ' + cat + ': ' + (j.articles?.length || 0) + ' Artikel';
+      }
+    } catch(e) {
+      box.textContent += '\n❌ ' + cat + ': ' + e.message;
+    }
+    // Kurze Pause
+    await new Promise(r => setTimeout(r, 500));
+  }
+  
+  box.className = 'box info';
+  box.textContent += '\n\nFertig!';
+}
+</script>
+</body>
+</html>
